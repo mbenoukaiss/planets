@@ -16,7 +16,8 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #ffffff;
+    background-color: #333333;
+    color: #FFFFFF;
     font-size: 8em;
     z-index: 10;
 }
