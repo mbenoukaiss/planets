@@ -1,7 +1,7 @@
 import * as Three from "../vendor/threejs/build/three.module.js";
 import Stats from "../vendor/stats.js";
 import {OrbitControls} from "../vendor/threejs/examples/jsm/controls/OrbitControls.js";
-import Planet from "./planet.js";
+import {Planet, Layer} from "./planet.js";
 
 const obj = {};
 
@@ -44,6 +44,7 @@ const scene = {
         }
         obj.scene.add(obj.sun);
 
+        //lights that will light the sun itself and no other object
         let sun_light_points = new Three.SphereGeometry(150, 8, 4);
 
         for (let vertex of sun_light_points.vertices) {
@@ -52,24 +53,41 @@ const scene = {
             obj.scene.add(light);
         }
 
+        //light for planets
         obj.sun_light = new Three.PointLight(0xFFFFFF, 1);
         obj.scene.add(obj.sun_light);
 
         obj.earth = Planet.create("earth", {
-            color: 0x4287F5,
-            size: 20,
-            sharpness: 5,
+            layers: [
+                Layer.create({
+                    color: 0x4287F5,
+                    size: 20,
+                    sharpness: 5,
+                }),
+                Layer.create({
+                    color: 0x4C9E3F,
+                    size: 20,
+                    sharpness: 7
+                })
+            ],
             orbit: {
                 x: 350,
                 y: 50,
                 z: 350
+            },
+            velocity: {
+                orbit: 2
             }
-        }).on(obj.scene);
+        }).on(obj.sun);
 
         obj.moon = Planet.create("moon", {
-            color: 0xFFFFFF,
-            size: 5,
-            sharpness: 0,
+            layers: [
+                Layer.create({
+                    color: 0xFFFFFF,
+                    size: 5,
+                    sharpness: 0,
+                })
+            ],
             orbit: {
                 x: 50,
                 y: 50,
@@ -81,18 +99,45 @@ const scene = {
         }).on(obj.earth);
 
         obj.mars = Planet.create("mars", {
-            color: 0x733D36,
-            size: 15,
-            sharpness: 2,
+            layers: [
+                Layer.create({
+                    color: 0x733D36,
+                    size: 15,
+                    sharpness: 2,
+                })
+            ],
             orbit: {
                 x: 500,
                 y: 300,
                 z: 600
             },
             velocity: {
-                orbit: 2
+                orbit: 1.5
             }
-        }).on(obj.scene);
+        }).on(obj.sun);
+
+        obj.jupiter = Planet.create("jupiter", {
+            layers: [
+                Layer.create({
+                    color: 0xDECD78,
+                    size: 40,
+                    sharpness: 10,
+                }),
+                Layer.create({
+                    color: 0xC7A740,
+                    size: 40.5,
+                    sharpness: 15,
+                })
+            ],
+            orbit: {
+                x: 1000,
+                y: 600,
+                z: 900
+            },
+            velocity: {
+                orbit: 1
+            }
+        }).on(obj.sun);
 
         obj.controls = new OrbitControls(obj.camera, obj.renderer.domElement);
         obj.controls.target.set(obj.scene.position.x, obj.scene.position.y, obj.scene.position.z);
@@ -112,6 +157,7 @@ const scene = {
         obj.earth.update(time);
         obj.moon.update(time);
         obj.mars.update(time);
+        obj.jupiter.update(time);
 
         obj.sun.geometry.verticesNeedUpdate = true;
 

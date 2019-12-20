@@ -1,6 +1,6 @@
 import * as Three from "../vendor/threejs/build/three.module.js";
 
-export default class Planet {
+export class Planet {
     mesh;
 
     name;
@@ -17,9 +17,7 @@ export default class Planet {
 
     constructor() {
         this.parameters = {
-            color: 0x333333,
-            size: 50,
-            sharpness: 5,
+            layers: [],
             distance: 200,
             orbit: {
                 x: 50,
@@ -34,14 +32,11 @@ export default class Planet {
     }
 
     initialize() {
-        let geometry = new Three.SphereGeometry(this.parameters.size, this.parameters.size, this.parameters.size);
-        for(let vertex of geometry.vertices) {
-            vertex.y += (Math.random() - 0.5) * this.parameters.sharpness;
-        }
+        this.mesh = new Three.Object3D();
 
-        this.mesh = new Three.Mesh(geometry, new Three.MeshLambertMaterial({color: this.parameters.color}));
-        this.mesh.name = this.name;
-        this.mesh.position
+        for(let layer of this.parameters.layers) {
+            this.mesh.add(layer.mesh);
+        }
     }
 
     update(time) {
@@ -54,12 +49,44 @@ export default class Planet {
     }
 
     on(object) {
-        if(object.type == "Scene") {
+        if (object.type == "Scene" || object.type == "Mesh") {
             object.add(this.mesh);
         } else {
+            console.log(object);
             object.mesh.add(this.mesh);
         }
 
         return this;
+    }
+}
+
+export class Layer {
+    mesh;
+
+    parameters;
+
+    static create(parameters) {
+        let layer = new Layer();
+        layer.parameters = {...layer.parameters, ...parameters};
+
+        layer.initialize();
+        return layer;
+    }
+
+    constructor() {
+        this.parameters = {
+            color: 0x333333,
+            size: 50,
+            sharpness: 5,
+        }
+    }
+
+    initialize() {
+        let geometry = new Three.SphereGeometry(this.parameters.size, this.parameters.size, this.parameters.size);
+        for(let vertex of geometry.vertices) {
+            vertex.y += (Math.random() - 0.5) * this.parameters.sharpness;
+        }
+
+        this.mesh = new Three.Mesh(geometry, new Three.MeshLambertMaterial({color: this.parameters.color}));
     }
 }
