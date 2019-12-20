@@ -1,7 +1,7 @@
 import * as Three from "../vendor/threejs/build/three.module.js";
 import Stats from "../vendor/stats.js";
 import {OrbitControls} from "../vendor/threejs/examples/jsm/controls/OrbitControls.js";
-import {Planet, Layer} from "./planet.js";
+import {Planet, Layer, Ring} from "./planet.js";
 
 const obj = {};
 
@@ -129,6 +129,12 @@ const scene = {
                     sharpness: 15,
                 })
             ],
+            ring: Ring.create({
+                color: 0xC7A740,
+                radius: 75,
+                thickness: 5,
+                sharpness: 5,
+            }),
             orbit: {
                 x: 1000,
                 y: 600,
