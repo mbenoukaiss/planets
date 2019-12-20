@@ -57,6 +57,47 @@ const scene = {
         obj.sun_light = new Three.PointLight(0xFFFFFF, 1);
         obj.scene.add(obj.sun_light);
 
+        obj.mercury = Planet.create("mercury", {
+            layers: [
+                Layer.create({
+                    color: 0xA69188,
+                    size: 7.5,
+                    sharpness: 1,
+                })
+            ],
+            orbit: {
+                x: 250,
+                y: 50,
+                z: 250
+            },
+            velocity: {
+                orbit: 5
+            }
+        }).on(obj.sun);
+
+        obj.venus = Planet.create("venus", {
+            layers: [
+                Layer.create({
+                    color: 0xE6D367,
+                    size: 15,
+                    sharpness: 3,
+                }),
+                Layer.create({
+                    color: 0xFFF4BF,
+                    size: 15,
+                    sharpness: 5
+                })
+            ],
+            orbit: {
+                x: 350,
+                y: 50,
+                z: 300
+            },
+            velocity: {
+                orbit: 3
+            }
+        }).on(obj.sun);
+
         obj.earth = Planet.create("earth", {
             layers: [
                 Layer.create({
@@ -71,9 +112,9 @@ const scene = {
                 })
             ],
             orbit: {
-                x: 350,
+                x: 450,
                 y: 50,
-                z: 350
+                z: 450
             },
             velocity: {
                 orbit: 2
@@ -107,9 +148,9 @@ const scene = {
                 })
             ],
             orbit: {
-                x: 500,
+                x: 600,
                 y: 300,
-                z: 600
+                z: 700
             },
             velocity: {
                 orbit: 1.5
@@ -120,28 +161,105 @@ const scene = {
             layers: [
                 Layer.create({
                     color: 0xDECD78,
-                    size: 40,
-                    sharpness: 10,
+                    size: 60,
+                    sharpness: 5,
                 }),
                 Layer.create({
                     color: 0xC7A740,
-                    size: 40.5,
-                    sharpness: 15,
+                    size: 61,
+                    sharpness: 10,
                 })
             ],
             ring: Ring.create({
-                color: 0xC7A740,
-                radius: 75,
-                thickness: 5,
+                color: 0x917200,
+                opacity: 0.5,
+                radius: 90,
+                thickness: 2,
                 sharpness: 5,
             }),
             orbit: {
-                x: 1000,
+                x: 1200,
                 y: 600,
-                z: 900
+                z: 1000
             },
             velocity: {
                 orbit: 1
+            }
+        }).on(obj.sun);
+
+        obj.saturn = Planet.create("saturn", {
+            layers: [
+                Layer.create({
+                    color: 0xE3D591,
+                    size: 50,
+                    sharpness: 4,
+                }),
+                Layer.create({
+                    color: 0xB8AA6A,
+                    size: 50,
+                    sharpness: 7,
+                })
+            ],
+            ring: Ring.create({
+                color: 0xD1BB56,
+                opacity: 0.8,
+                radius: 75,
+                thickness: 5,
+                sharpness: 3,
+            }),
+            orbit: {
+                x: 1600,
+                y: -400,
+                z: 1800
+            },
+            velocity: {
+                orbit: 0.7
+            }
+        }).on(obj.sun);
+
+        obj.uranus = Planet.create("uranus", {
+            layers: [
+                Layer.create({
+                    color: 0x379EB3,
+                    size: 25,
+                    sharpness: 5,
+                }),
+                Layer.create({
+                    color: 0x48C2DB,
+                    size: 25,
+                    sharpness: 5,
+                })
+            ],
+            orbit: {
+                x: 2300,
+                y: -50,
+                z: 2000
+            },
+            velocity: {
+                orbit: 0.5
+            }
+        }).on(obj.sun);
+
+        obj.neptune = Planet.create("neptune", {
+            layers: [
+                Layer.create({
+                    color: 0x0B54DB,
+                    size: 30,
+                    sharpness: 4,
+                }),
+                Layer.create({
+                    color: 0x0948BD,
+                    size: 30,
+                    sharpness: 5,
+                })
+            ],
+            orbit: {
+                x: 2800,
+                y: 400,
+                z: 2900
+            },
+            velocity: {
+                orbit: 0.3
             }
         }).on(obj.sun);
 
@@ -160,10 +278,15 @@ const scene = {
         }
 
         let time = Date.now() * 0.0005;
+        obj.mercury.update(time);
+        obj.venus.update(time);
         obj.earth.update(time);
         obj.moon.update(time);
         obj.mars.update(time);
         obj.jupiter.update(time);
+        obj.saturn.update(time);
+        obj.uranus.update(time);
+        obj.neptune.update(time);
 
         obj.sun.geometry.verticesNeedUpdate = true;
 
