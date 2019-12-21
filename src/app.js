@@ -1,8 +1,8 @@
 import * as Three from "../vendor/threejs/build/three.module.js";
-import Stats from "../vendor/stats.js";
 import {OrbitControls} from "../vendor/threejs/examples/jsm/controls/OrbitControls.js";
 import {Planet, Layer, Ring} from "./planet.js";
-import {random_sign, within} from "./utils.js";
+import {ToggleButton} from "./button.js";
+import {within, random_vector} from "./utils.js";
 
 const obj = {};
 
@@ -11,8 +11,9 @@ const scene = {
         obj.container = document.createElement("div");
         destination.appendChild(obj.container);
 
-        obj.stats = new Stats();
-        document.body.appendChild(obj.stats.dom);
+        obj.follow_earth = new ToggleButton("Follow earth", obj.container, 20, 10)
+        obj.follow_earth.onactivation = () => obj.earth.mesh.add(obj.camera);
+        obj.follow_earth.ondeactivation = () => obj.earth.mesh.remove(obj.camera);
 
         if (fullscreen) {
             obj.container.classList.add("fullscreen");
@@ -61,12 +62,12 @@ const scene = {
                 Layer.create({
                     color: 0xE6D367,
                     size: 15,
-                    sharpness: 3,
+                    sharpness: 2,
                 }),
                 Layer.create({
                     color: 0xFFF4BF,
                     size: 15,
-                    sharpness: 5
+                    sharpness: 4
                 })
             ],
             orbit: {
@@ -84,12 +85,12 @@ const scene = {
                 Layer.create({
                     color: 0x4287F5,
                     size: 20,
-                    sharpness: 5,
+                    sharpness: 0,
                 }),
                 Layer.create({
                     color: 0x4C9E3F,
                     size: 20,
-                    sharpness: 7
+                    sharpness: 2
                 })
             ],
             orbit: {
@@ -164,7 +165,7 @@ const scene = {
                 z: 2000
             },
             velocity: {
-                orbit: 1
+                orbit: 0.8
             }
         }).on(obj.sun);
 
@@ -194,7 +195,7 @@ const scene = {
                 z: 2600
             },
             velocity: {
-                orbit: 0.7
+                orbit: 0.5
             }
         }).on(obj.sun);
 
@@ -217,7 +218,7 @@ const scene = {
                 z: 3600
             },
             velocity: {
-                orbit: 0.5
+                orbit: 0.3
             }
         }).on(obj.sun);
 
@@ -240,13 +241,13 @@ const scene = {
                 z: 4900
             },
             velocity: {
-                orbit: 0.3
+                orbit: 0.1
             }
         }).on(obj.sun);
 
         obj.controls = new OrbitControls(obj.camera, obj.renderer.domElement);
         obj.controls.minDistance = 250;
-        obj.controls.maxDistance = 1750;
+        obj.controls.maxDistance = 6000;
         obj.controls.target.set(obj.scene.position.x, obj.scene.position.y, obj.scene.position.z);
         obj.controls.update();
 
@@ -279,20 +280,15 @@ const scene = {
     initialize_stars: () => {
         let geometry = new Three.Geometry();
 
-        for(let i = 0; i < 500000; ++i) {
-            console.log(random_sign());
-            let star = new Three.Vector3();
-            star.x = Three.Math.randFloatSpread(10000);
-            star.y = Three.Math.randFloatSpread(10000);
-            star.z = Three.Math.randFloatSpread(10000);
-
-            geometry.vertices.push(star);
+        for (let i = 0; i < 500000; ++i) {
+            geometry.vertices.push(random_vector(1000, 10000));
         }
 
         obj.stars = new Three.Points(geometry, new Three.PointsMaterial({color: 0xFFFFFF}));
         obj.scene.add(obj.stars);
     },
     animate: () => {
+        console.log(obj.camera.position);
         for (let vertex of obj.sun.geometry.vertices) {
             vertex.x = within(vertex.x + (Math.random() - 0.5) * 2, vertex.ox, 5);
             vertex.y = within(vertex.y + (Math.random() - 0.5) * 2, vertex.oy, 5);
@@ -313,7 +309,7 @@ const scene = {
         obj.sun.geometry.verticesNeedUpdate = true;
 
         scene.render();
-        obj.stats.update();
+        //obj.stats.update();
         requestAnimationFrame(scene.animate);
     },
 

@@ -86,7 +86,7 @@ export class Layer {
     }
 
     initialize() {
-        let geometry = new Three.SphereGeometry(this.parameters.size, this.parameters.size / 2, this.parameters.size / 2);
+        let geometry = new Three.SphereGeometry(this.parameters.size, this.parameters.size, this.parameters.size);
         for(let vertex of geometry.vertices) {
             vertex.x += (Math.random() - 0.5) * this.parameters.sharpness;
             vertex.y += (Math.random() - 0.5) * this.parameters.sharpness;
@@ -122,7 +122,7 @@ export class Ring {
     }
 
     initialize() {
-        let geometry = new Three.CylinderGeometry(this.parameters.radius, this.parameters.radius, this.parameters.thickness, this.parameters.radius / 2, this.parameters.thickness / 2);
+        let geometry = new Three.CylinderGeometry(this.parameters.radius, this.parameters.radius, this.parameters.thickness, this.parameters.radius, this.parameters.thickness);
         for(let vertex of geometry.vertices) {
             vertex.x += (Math.random() - 0.5) * this.parameters.sharpness;
             vertex.y += (Math.random() - 0.5) * this.parameters.sharpness;
