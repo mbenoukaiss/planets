@@ -2,7 +2,7 @@ import * as Three from "../vendor/threejs/build/three.module.js";
 import {OrbitControls} from "../vendor/threejs/examples/jsm/controls/OrbitControls.js";
 import {Planet, Layer, Ring} from "./planet.js";
 import {ToggleButton} from "./button.js";
-import {within, random_vector} from "./utils.js";
+import {within, randomVector} from "./utils.js";
 
 const obj = {};
 
@@ -12,8 +12,8 @@ const scene = {
         destination.appendChild(obj.container);
 
         obj.follow_earth = new ToggleButton("Follow earth", obj.container, 20, 10)
-        obj.follow_earth.onactivation = () => obj.earth.mesh.add(obj.camera);
-        obj.follow_earth.ondeactivation = () => obj.earth.mesh.remove(obj.camera);
+        obj.follow_earth.onactivation = () => obj.earth.add(obj.camera);
+        obj.follow_earth.ondeactivation = () => obj.earth.remove(obj.camera);
 
         if (fullscreen) {
             obj.container.classList.add("fullscreen");
@@ -36,9 +36,43 @@ const scene = {
         obj.ambiant = new Three.AmbientLight(0xFFFFFF, 0.3);
         obj.scene.add(obj.ambiant);
 
-        scene.initialize_sun();
-        scene.initialize_stars();
+        scene.initializeSun();
+        scene.initializePlanets();
+        scene.initializeStars();
 
+        obj.controls = new OrbitControls(obj.camera, obj.renderer.domElement);
+        obj.controls.minDistance = 250;
+        obj.controls.maxDistance = 6000;
+        obj.controls.target.set(obj.scene.position.x, obj.scene.position.y, obj.scene.position.z);
+        obj.controls.update();
+
+        document.getElementById("loading").remove();
+    },
+    initializeSun: () => {
+        obj.sun = new Three.Mesh(new Three.SphereGeometry(100, 20, 20), new Three.MeshPhongMaterial({color: 0xF7DC6F}));
+        obj.sun.castShadow = true;
+        obj.sun.receiveShadow = true;
+        for (let vertex of obj.sun.geometry.vertices) {
+            vertex.ox = vertex.x;
+            vertex.oy = vertex.y;
+            vertex.oz = vertex.z;
+        }
+        obj.scene.add(obj.sun);
+
+        //lights that will light the sun itself and no other object
+        let sun_light_points = new Three.SphereGeometry(150, 8, 4);
+
+        for (let vertex of sun_light_points.vertices) {
+            let light = new Three.SpotLight(0xFFFFFF, 1.5, 200, 1);
+            light.position.set(vertex.x, vertex.y, vertex.z);
+            obj.scene.add(light);
+        }
+
+        //light for planets
+        obj.sun_light = new Three.PointLight(0xFFFFFF, 1);
+        obj.scene.add(obj.sun_light);
+    },
+    initializePlanets: () => {
         obj.mercury = Planet.create("mercury", {
             layers: [
                 Layer.create({
@@ -99,7 +133,10 @@ const scene = {
                 z: 450
             },
             velocity: {
-                orbit: 2
+                orbit: 2,
+                rotation: {
+                    y: Math.PI / 16,
+                }
             }
         }).on(obj.sun);
 
@@ -113,11 +150,11 @@ const scene = {
             ],
             orbit: {
                 x: 50,
-                y: 50,
+                y: 0,
                 z: 50,
             },
             velocity: {
-                orbit: 10
+                orbit: 5
             }
         }).on(obj.earth);
 
@@ -152,13 +189,6 @@ const scene = {
                     sharpness: 10,
                 })
             ],
-            ring: Ring.create({
-                color: 0x917200,
-                opacity: 0.5,
-                radius: 90,
-                thickness: 2,
-                sharpness: 5,
-            }),
             orbit: {
                 x: 2300,
                 y: 600,
@@ -194,6 +224,9 @@ const scene = {
                 y: -400,
                 z: 2600
             },
+            rotation: {
+                x: -Math.PI / 8
+            },
             velocity: {
                 orbit: 0.5
             }
@@ -212,6 +245,13 @@ const scene = {
                     sharpness: 5,
                 })
             ],
+            ring: Ring.create({
+                color: 0x917200,
+                opacity: 0.3,
+                radius: 50,
+                thickness: 1,
+                sharpness: 5,
+            }),
             orbit: {
                 x: 3400,
                 y: -50,
@@ -230,7 +270,7 @@ const scene = {
                     sharpness: 4,
                 }),
                 Layer.create({
-                    color: 0x0948BD,
+                    color: 0x3D21DB,
                     size: 30,
                     sharpness: 5,
                 })
@@ -244,51 +284,18 @@ const scene = {
                 orbit: 0.1
             }
         }).on(obj.sun);
-
-        obj.controls = new OrbitControls(obj.camera, obj.renderer.domElement);
-        obj.controls.minDistance = 250;
-        obj.controls.maxDistance = 6000;
-        obj.controls.target.set(obj.scene.position.x, obj.scene.position.y, obj.scene.position.z);
-        obj.controls.update();
-
-        document.getElementById("loading").remove();
     },
-    initialize_sun: () => {
-        obj.sun = new Three.Mesh(new Three.SphereGeometry(100, 20, 20), new Three.MeshPhongMaterial({color: 0xF7DC6F}));
-        obj.sun.castShadow = true;
-        obj.sun.receiveShadow = true;
-        for (let vertex of obj.sun.geometry.vertices) {
-            vertex.ox = vertex.x;
-            vertex.oy = vertex.y;
-            vertex.oz = vertex.z;
-        }
-        obj.scene.add(obj.sun);
-
-        //lights that will light the sun itself and no other object
-        let sun_light_points = new Three.SphereGeometry(150, 8, 4);
-
-        for (let vertex of sun_light_points.vertices) {
-            let light = new Three.SpotLight(0xFFFFFF, 1.5, 200, 1);
-            light.position.set(vertex.x, vertex.y, vertex.z);
-            obj.scene.add(light);
-        }
-
-        //light for planets
-        obj.sun_light = new Three.PointLight(0xFFFFFF, 1);
-        obj.scene.add(obj.sun_light);
-    },
-    initialize_stars: () => {
+    initializeStars: () => {
         let geometry = new Three.Geometry();
 
         for (let i = 0; i < 500000; ++i) {
-            geometry.vertices.push(random_vector(1000, 10000));
+            geometry.vertices.push(randomVector(0, 10000));
         }
 
         obj.stars = new Three.Points(geometry, new Three.PointsMaterial({color: 0xFFFFFF}));
         obj.scene.add(obj.stars);
     },
     animate: () => {
-        console.log(obj.camera.position);
         for (let vertex of obj.sun.geometry.vertices) {
             vertex.x = within(vertex.x + (Math.random() - 0.5) * 2, vertex.ox, 5);
             vertex.y = within(vertex.y + (Math.random() - 0.5) * 2, vertex.oy, 5);
@@ -312,11 +319,9 @@ const scene = {
         //obj.stats.update();
         requestAnimationFrame(scene.animate);
     },
-
     render: () => {
         obj.renderer.render(obj.scene, obj.camera);
     },
-
     onWindowResize: () => {
         obj.camera.aspect = window.innerWidth / window.innerHeight;
         obj.camera.updateProjectionMatrix();

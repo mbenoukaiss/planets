@@ -4,7 +4,7 @@ export function random_sign() {
     return Math.round(Math.random()) ? 1 : -1;
 }
 
-export function random_vector(low, high) {
+export function randomVector(low, high) {
     let vector = new Three.Vector3();
 
     do {
@@ -27,4 +27,24 @@ export function within(val, base, variation) {
     }
 
     return val;
+}
+
+Object.isObject = function(item) {
+    return (item && typeof item === 'object' && !Array.isArray(item));
+};
+
+export function merge(base, other) {
+    if(Object.isObject(base) && Object.isObject(other)) {
+        for(const [key, val] of Object.entries(other)) {
+            if(base[key] !== undefined) {
+                base[key] = merge(base[key], val);
+            } else {
+                base[key] = val;
+            }
+        }
+
+        return base;
+    } else {
+        return other;
+    }
 }
